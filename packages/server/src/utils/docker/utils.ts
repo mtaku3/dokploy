@@ -4,7 +4,7 @@ import type { Readable } from "node:stream";
 import { docker, paths } from "@dokploy/server/constants";
 import type { ContainerInfo, ResourceRequirements } from "dockerode";
 import { parse } from "dotenv";
-import type { ApplicationNested } from "../builders";
+import type { ApplicationNested, ApplicationNestedWithDomains } from "../builders";
 import type { MariadbNested } from "../databases/mariadb";
 import type { MongoNested } from "../databases/mongo";
 import type { MysqlNested } from "../databases/mysql";
@@ -14,6 +14,7 @@ import { execAsync, execAsyncRemote } from "../process/execAsync";
 import { spawnAsync } from "../process/spawnAsync";
 import { getRemoteDocker } from "../servers/remote-docker";
 import type { Compose } from "@dokploy/server/services/compose";
+import { createDomainLabels } from "./domain";
 
 interface RegistryAuth {
 	username: string;
@@ -337,8 +338,9 @@ export const calculateResources = ({
 	};
 };
 
-export const generateConfigContainer = (application: ApplicationNested) => {
+export const generateConfigContainer = (application: ApplicationNestedWithDomains) => {
 	const {
+		appName,
 		healthCheckSwarm,
 		restartPolicySwarm,
 		placementSwarm,
@@ -349,9 +351,29 @@ export const generateConfigContainer = (application: ApplicationNested) => {
 		replicas,
 		mounts,
 		networkSwarm,
+		domains,
 	} = application;
 
 	const haveMounts = mounts.length > 0;
+
+	let labelsTraefik: Record<string, string> | null = null;
+	if (domains.length === 1) {
+		const domain = domains[0]!;
+		const { https } = domain;
+		const httpLabels = createDomainLabels(appName, domain, "web");
+		if (https) {
+			const httpsLabels = createDomainLabels(appName, domain, "websecure");
+			httpLabels.push(...httpsLabels);
+		}
+		labelsTraefik = {};
+		for (const label of httpLabels) {
+			const [key, value] = label.split("=");
+			if (key && value) {
+				labelsTraefik[key] = value;
+			}
+		}
+	}
+	const labels = (labelsSwarm || labelsTraefik) ? { ...(labelsSwarm || {}), ...(labelsTraefik || {}) } : null;
 
 	return {
 		...(healthCheckSwarm && {
@@ -372,8 +394,8 @@ export const generateConfigContainer = (application: ApplicationNested) => {
 						Constraints: haveMounts ? ["node.role==manager"] : [],
 					},
 				}),
-		...(labelsSwarm && {
-			Labels: labelsSwarm,
+		...(labels && {
+			Labels: labels,
 		}),
 		...(modeSwarm
 			? {

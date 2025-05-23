@@ -35,8 +35,21 @@ export type ApplicationNested = InferResultType<
 	}
 >;
 
+export type ApplicationNestedWithDomains = InferResultType<
+	"applications",
+	{
+		mounts: true;
+		security: true;
+		redirects: true;
+		ports: true;
+		registry: true;
+		project: true;
+		domains: true;
+	}
+>;
+
 export const buildApplication = async (
-	application: ApplicationNested,
+	application: ApplicationNestedWithDomains,
 	logPath: string,
 ) => {
 	const writeStream = createWriteStream(logPath, { flags: "a" });
@@ -111,7 +124,7 @@ export const getBuildCommand = (
 };
 
 export const mechanizeDockerContainer = async (
-	application: ApplicationNested,
+	application: ApplicationNestedWithDomains,
 ) => {
 	const {
 		appName,
