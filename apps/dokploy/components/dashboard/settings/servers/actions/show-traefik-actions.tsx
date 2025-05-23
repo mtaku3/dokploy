@@ -65,18 +65,20 @@ export const ShowTraefikActions = ({ serverId }: Props) => {
 					>
 						<span>{t("settings.server.webServer.reload")}</span>
 					</DropdownMenuItem>
-					<ShowModalLogs
-						appName="dokploy-traefik"
-						serverId={serverId}
-						type="standalone"
-					>
-						<DropdownMenuItem
-							onSelect={(e) => e.preventDefault()}
-							className="cursor-pointer"
-						>
-							{t("settings.server.webServer.watchLogs")}
-						</DropdownMenuItem>
-					</ShowModalLogs>
+					{
+					// <ShowModalLogs
+					// 	appName="dokploy-traefik"
+					// 	serverId={serverId}
+					// 	type="standalone"
+					// >
+					// 	<DropdownMenuItem
+					// 		onSelect={(e) => e.preventDefault()}
+					// 		className="cursor-pointer"
+					// 	>
+					// 		{t("settings.server.webServer.watchLogs")}
+					// 	</DropdownMenuItem>
+					// </ShowModalLogs>
+					}
 					<EditTraefikEnv serverId={serverId}>
 						<DropdownMenuItem
 							onSelect={(e) => e.preventDefault()}

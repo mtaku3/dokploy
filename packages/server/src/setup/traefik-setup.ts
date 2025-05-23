@@ -33,118 +33,118 @@ export const initializeTraefik = async ({
 	additionalPorts = [],
 	force = false,
 }: TraefikOptions = {}) => {
-	const { MAIN_TRAEFIK_PATH, DYNAMIC_TRAEFIK_PATH } = paths(!!serverId);
-	const imageName = `traefik:v${TRAEFIK_VERSION}`;
-	const containerName = "dokploy-traefik";
-
-	const exposedPorts: Record<string, {}> = {
-		[`${TRAEFIK_PORT}/tcp`]: {},
-		[`${TRAEFIK_SSL_PORT}/tcp`]: {},
-		[`${TRAEFIK_HTTP3_PORT}/udp`]: {},
-	};
-
-	const portBindings: Record<string, Array<{ HostPort: string }>> = {
-		[`${TRAEFIK_PORT}/tcp`]: [{ HostPort: TRAEFIK_PORT.toString() }],
-		[`${TRAEFIK_SSL_PORT}/tcp`]: [{ HostPort: TRAEFIK_SSL_PORT.toString() }],
-		[`${TRAEFIK_HTTP3_PORT}/udp`]: [
-			{ HostPort: TRAEFIK_HTTP3_PORT.toString() },
-		],
-	};
-
-	if (enableDashboard) {
-		exposedPorts["8080/tcp"] = {};
-		portBindings["8080/tcp"] = [{ HostPort: "8080" }];
-	}
-
-	for (const port of additionalPorts) {
-		const portKey = `${port.targetPort}/tcp`;
-		exposedPorts[portKey] = {};
-		portBindings[portKey] = [{ HostPort: port.publishedPort.toString() }];
-	}
-
-	const settings: ContainerCreateOptions = {
-		name: containerName,
-		Image: imageName,
-		NetworkingConfig: {
-			EndpointsConfig: {
-				"dokploy-network": {},
-			},
-		},
-		ExposedPorts: exposedPorts,
-		HostConfig: {
-			RestartPolicy: {
-				Name: "always",
-			},
-			Binds: [
-				`${MAIN_TRAEFIK_PATH}/traefik.yml:/etc/traefik/traefik.yml`,
-				`${DYNAMIC_TRAEFIK_PATH}:/etc/dokploy/traefik/dynamic`,
-				"/var/run/docker.sock:/var/run/docker.sock",
-			],
-			PortBindings: portBindings,
-		},
-		Env: env,
-	};
-
-	const docker = await getRemoteDocker(serverId);
-	try {
-		try {
-			const service = docker.getService("dokploy-traefik");
-			await service?.remove({ force: true });
-
-			let attempts = 0;
-			const maxAttempts = 5;
-			while (attempts < maxAttempts) {
-				try {
-					await docker.listServices({
-						filters: { name: ["dokploy-traefik"] },
-					});
-					console.log("Waiting for service cleanup...");
-					await new Promise((resolve) => setTimeout(resolve, 5000));
-					attempts++;
-				} catch (_e) {
-					break;
-				}
-			}
-		} catch (_err) {
-			console.log("No existing service to remove");
-		}
-
-		// Then try to remove any existing container
-		const container = docker.getContainer(containerName);
-		try {
-			const inspect = await container.inspect();
-			if (inspect.State.Status === "running" && !force) {
-				console.log("Traefik already running");
-				return;
-			}
-
-			await container.remove({ force: true });
-			await new Promise((resolve) => setTimeout(resolve, 5000));
-		} catch (_err) {
-			console.log("No existing container to remove");
-		}
-
-		// Create and start the new container
-		try {
-			await docker.createContainer(settings);
-			const newContainer = docker.getContainer(containerName);
-			await newContainer.start();
-			console.log("Traefik container started successfully");
-		} catch (error: any) {
-			if (error?.json?.message?.includes("port is already allocated")) {
-				console.log("Ports still in use, waiting longer for cleanup...");
-				await new Promise((resolve) => setTimeout(resolve, 10000));
-				// Try one more time
-				await docker.createContainer(settings);
-				const newContainer = docker.getContainer(containerName);
-				await newContainer.start();
-				console.log("Traefik container started successfully after retry");
-			}
-		}
-	} catch (error) {
-		console.error("Failed to initialize Traefik:", error);
-		throw error;
-	}
+	// const { MAIN_TRAEFIK_PATH, DYNAMIC_TRAEFIK_PATH } = paths(!!serverId);
+	// const imageName = `traefik:v${TRAEFIK_VERSION}`;
+	// const containerName = "dokploy-traefik";
+	//
+	// const exposedPorts: Record<string, {}> = {
+	// 	[`${TRAEFIK_PORT}/tcp`]: {},
+	// 	[`${TRAEFIK_SSL_PORT}/tcp`]: {},
+	// 	[`${TRAEFIK_HTTP3_PORT}/udp`]: {},
+	// };
+	//
+	// const portBindings: Record<string, Array<{ HostPort: string }>> = {
+	// 	[`${TRAEFIK_PORT}/tcp`]: [{ HostPort: TRAEFIK_PORT.toString() }],
+	// 	[`${TRAEFIK_SSL_PORT}/tcp`]: [{ HostPort: TRAEFIK_SSL_PORT.toString() }],
+	// 	[`${TRAEFIK_HTTP3_PORT}/udp`]: [
+	// 		{ HostPort: TRAEFIK_HTTP3_PORT.toString() },
+	// 	],
+	// };
+	//
+	// if (enableDashboard) {
+	// 	exposedPorts["8080/tcp"] = {};
+	// 	portBindings["8080/tcp"] = [{ HostPort: "8080" }];
+	// }
+	//
+	// for (const port of additionalPorts) {
+	// 	const portKey = `${port.targetPort}/tcp`;
+	// 	exposedPorts[portKey] = {};
+	// 	portBindings[portKey] = [{ HostPort: port.publishedPort.toString() }];
+	// }
+	//
+	// const settings: ContainerCreateOptions = {
+	// 	name: containerName,
+	// 	Image: imageName,
+	// 	NetworkingConfig: {
+	// 		EndpointsConfig: {
+	// 			"dokploy-network": {},
+	// 		},
+	// 	},
+	// 	ExposedPorts: exposedPorts,
+	// 	HostConfig: {
+	// 		RestartPolicy: {
+	// 			Name: "always",
+	// 		},
+	// 		Binds: [
+	// 			`${MAIN_TRAEFIK_PATH}/traefik.yml:/etc/traefik/traefik.yml`,
+	// 			`${DYNAMIC_TRAEFIK_PATH}:/etc/dokploy/traefik/dynamic`,
+	// 			"/var/run/docker.sock:/var/run/docker.sock",
+	// 		],
+	// 		PortBindings: portBindings,
+	// 	},
+	// 	Env: env,
+	// };
+	//
+	// const docker = await getRemoteDocker(serverId);
+	// try {
+	// 	try {
+	// 		const service = docker.getService("dokploy-traefik");
+	// 		await service?.remove({ force: true });
+	//
+	// 		let attempts = 0;
+	// 		const maxAttempts = 5;
+	// 		while (attempts < maxAttempts) {
+	// 			try {
+	// 				await docker.listServices({
+	// 					filters: { name: ["dokploy-traefik"] },
+	// 				});
+	// 				console.log("Waiting for service cleanup...");
+	// 				await new Promise((resolve) => setTimeout(resolve, 5000));
+	// 				attempts++;
+	// 			} catch (_e) {
+	// 				break;
+	// 			}
+	// 		}
+	// 	} catch (_err) {
+	// 		console.log("No existing service to remove");
+	// 	}
+	//
+	// 	// Then try to remove any existing container
+	// 	const container = docker.getContainer(containerName);
+	// 	try {
+	// 		const inspect = await container.inspect();
+	// 		if (inspect.State.Status === "running" && !force) {
+	// 			console.log("Traefik already running");
+	// 			return;
+	// 		}
+	//
+	// 		await container.remove({ force: true });
+	// 		await new Promise((resolve) => setTimeout(resolve, 5000));
+	// 	} catch (_err) {
+	// 		console.log("No existing container to remove");
+	// 	}
+	//
+	// 	// Create and start the new container
+	// 	try {
+	// 		await docker.createContainer(settings);
+	// 		const newContainer = docker.getContainer(containerName);
+	// 		await newContainer.start();
+	// 		console.log("Traefik container started successfully");
+	// 	} catch (error: any) {
+	// 		if (error?.json?.message?.includes("port is already allocated")) {
+	// 			console.log("Ports still in use, waiting longer for cleanup...");
+	// 			await new Promise((resolve) => setTimeout(resolve, 10000));
+	// 			// Try one more time
+	// 			await docker.createContainer(settings);
+	// 			const newContainer = docker.getContainer(containerName);
+	// 			await newContainer.start();
+	// 			console.log("Traefik container started successfully after retry");
+	// 		}
+	// 	}
+	// } catch (error) {
+	// 	console.error("Failed to initialize Traefik:", error);
+	// 	throw error;
+	// }
 };
 
 export const createDefaultServerTraefikConfig = () => {

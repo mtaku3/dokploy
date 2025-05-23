@@ -109,15 +109,15 @@ export const settingsRouter = createTRPCRouter({
 	reloadTraefik: adminProcedure
 		.input(apiServerSchema)
 		.mutation(async ({ input }) => {
-			try {
-				if (input?.serverId) {
-					await execAsync("docker restart dokploy-traefik");
-				} else if (!IS_CLOUD) {
-					await execAsync("docker restart dokploy-traefik");
-				}
-			} catch (err) {
-				console.error(err);
-			}
+			// try {
+			// 	if (input?.serverId) {
+			// 		await execAsync("docker restart dokploy-traefik");
+			// 	} else if (!IS_CLOUD) {
+			// 		await execAsync("docker restart dokploy-traefik");
+			// 	}
+			// } catch (err) {
+			// 	console.error(err);
+			// }
 
 			return true;
 		}),
@@ -542,6 +542,7 @@ export const settingsRouter = createTRPCRouter({
 	readTraefikEnv: adminProcedure
 		.input(apiServerSchema)
 		.query(async ({ input }) => {
+			return "";
 			const command =
 				"docker container inspect dokploy-traefik --format '{{json .Config.Env}}'";
 
@@ -572,6 +573,7 @@ export const settingsRouter = createTRPCRouter({
 	haveTraefikDashboardPortEnabled: adminProcedure
 		.input(apiServerSchema)
 		.query(async ({ input }) => {
+			return false;
 			const command = `docker container inspect --format='{{json .NetworkSettings.Ports}}' dokploy-traefik`;
 
 			let stdout = "";
@@ -837,6 +839,7 @@ export const settingsRouter = createTRPCRouter({
 });
 
 export const getTraefikPorts = async (serverId?: string) => {
+	return [];
 	const command = `docker container inspect --format='{{json .NetworkSettings.Ports}}' dokploy-traefik`;
 	try {
 		let stdout = "";

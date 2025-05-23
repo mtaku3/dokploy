@@ -478,8 +478,8 @@ export const removeCompose = async (
 		const projectPath = join(COMPOSE_PATH, compose.appName);
 
 		if (compose.composeType === "stack") {
+			// docker network disconnect ${compose.appName} dokploy-traefik;
 			const command = `
-			docker network disconnect ${compose.appName} dokploy-traefik;
 			cd ${projectPath} && docker stack rm ${compose.appName} && rm -rf ${projectPath}`;
 
 			if (compose.serverId) {
@@ -491,8 +491,8 @@ export const removeCompose = async (
 				cwd: projectPath,
 			});
 		} else {
+			// docker network disconnect ${compose.appName} dokploy-traefik;
 			const command = `
-			 docker network disconnect ${compose.appName} dokploy-traefik;
 			cd ${projectPath} && docker compose -p ${compose.appName} down ${
 				deleteVolumes ? "--volumes" : ""
 			} && rm -rf ${projectPath}`;

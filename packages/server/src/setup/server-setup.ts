@@ -541,6 +541,7 @@ export const installRClone = () => `
 `;
 
 export const createTraefikInstance = () => {
+	return "";
 	const command = `
 	    # Check if dokpyloy-traefik exists
 		if docker service inspect dokploy-traefik > /dev/null 2>&1; then
