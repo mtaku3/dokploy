@@ -1,5 +1,5 @@
 import { createWriteStream } from "node:fs";
-import { type ApplicationNested, mechanizeDockerContainer } from "../builders";
+import { type ApplicationNested, type ApplicationNestedWithDomains, mechanizeDockerContainer } from "../builders";
 import { pullImage } from "../docker/utils";
 
 interface RegistryAuth {
@@ -9,7 +9,7 @@ interface RegistryAuth {
 }
 
 export const buildDocker = async (
-	application: ApplicationNested,
+	application: ApplicationNestedWithDomains,
 	logPath: string,
 ): Promise<void> => {
 	const { buildType, dockerImage, username, password } = application;
