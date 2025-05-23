@@ -345,8 +345,8 @@ const Service = (
 
 											<ShowResources id={applicationId} type="application" />
 											<ShowVolumes id={applicationId} type="application" />
-											<ShowRedirects applicationId={applicationId} />
-											<ShowSecurity applicationId={applicationId} />
+											{ /* <ShowRedirects applicationId={applicationId} /> */ }
+											{ /* <ShowSecurity applicationId={applicationId} /> */ }
 											<ShowPorts applicationId={applicationId} />
 											<ShowTraefikConfig applicationId={applicationId} />
 										</div>

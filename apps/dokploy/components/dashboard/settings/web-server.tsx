@@ -45,7 +45,7 @@ export const WebServer = () => {
 					<CardContent className="space-y-6 py-6 border-t">
 						<div className="grid md:grid-cols-2 gap-4">
 							<ShowDokployActions />
-							<ShowTraefikActions />
+							{ /* <ShowTraefikActions /> */ }
 							<ShowStorageActions />
 
 							<UpdateServer />
