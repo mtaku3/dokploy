@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # Determine the type of build based on the first script argument
 BUILD_TYPE=${1:-production}
